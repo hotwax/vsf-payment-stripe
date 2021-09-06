@@ -1,0 +1,46 @@
+diff --git a/core/modules/checkout/components/Payment.ts b/core/modules/checkout/components/Payment.ts
+index 72e657a81..9314099f8 100644
+--- a/core/modules/checkout/components/Payment.ts
++++ b/core/modules/checkout/components/Payment.ts
+@@ -89,7 +89,7 @@ export const Payment = {
+   },
+   methods: {
+     sendDataToCheckout () {
+-      this.$bus.$emit('checkout-after-paymentDetails', this.payment, this.$v)
++      this.$bus.$emit('checkout-after-stripe-payment', this.payment, this.$v)
+       this.isFilled = true
+     },
+     edit () {
+diff --git a/src/modules/payment-cash-on-delivery/index.ts b/src/modules/payment-cash-on-delivery/index.ts
+index d9645a46d..dd8f0463f 100644
+--- a/src/modules/payment-cash-on-delivery/index.ts
++++ b/src/modules/payment-cash-on-delivery/index.ts
+@@ -12,17 +12,18 @@ export const PaymentCashOnDeliveryModule: StorefrontModule = function ({ store }
+       EventBus.$emit('checkout-do-placeOrder', {})
+     }
+   }
++  // Commented code to remove the COD
+   // Update the methods
+-  let paymentMethodConfig = {
+-    'title': 'Cash on delivery',
+-    'code': 'cashondelivery',
+-    'cost': 0,
+-    'costInclTax': 0,
+-    'default': true,
+-    'offline': true,
+-    'is_server_method': false
+-  }
+-  store.dispatch('checkout/addPaymentMethod', paymentMethodConfig)
++  // let paymentMethodConfig = {
++  //   'title': 'Cash on delivery',
++  //   'code': 'cashondelivery',
++  //   'cost': 0,
++  //   'costInclTax': 0,
++  //   'default': true,
++  //   'offline': true,
++  //   'is_server_method': false
++  // }
++  // store.dispatch('checkout/addPaymentMethod', paymentMethodConfig)
+   if (!isServer) {
+     // Update the methods
+     let paymentMethodConfig = {

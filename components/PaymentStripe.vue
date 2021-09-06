@@ -47,12 +47,13 @@ export default {
   }),
   beforeMount () {
     EventBus.$on('order-after-placed', this.onAfterPlaceOrder)
+    // Added Stripe specific event needed for Not Naked/Capybara theme where there is a separate confirmation page after payment 
     // Ready to place order, handle anything we need to, generating, validating stripe requests & tokens ect.
-    EventBus.$on('checkout-before-placeOrder', this.onBeforePlaceOrder)
+    EventBus.$on('checkout-after-stripe-payment', this.onBeforePlaceOrder)
   },
   beforeDestroy () {
     EventBus.$off('order-after-placed', this.onAfterPlaceOrder)
-    EventBus.$off('checkout-before-placeOrder', this.onBeforePlaceOrder)
+    EventBus.$off('checkout-after-stripe-payment', this.onBeforePlaceOrder)
   },
   mounted () {
     // Load the stripe.js elements script.
@@ -72,8 +73,9 @@ export default {
       // Stop display loader
       EventBus.$emit('notification-progress-stop')
     },
-    onBeforePlaceOrder () {
-      this.processStripeForm()
+    onBeforePlaceOrder (payment, $v) {
+      // TODO Check why processStripeForm called inside onBeforePlaceOrder and directly call/add logic here itself
+      this.processStripeForm(payment, $v)
     },
     loadStripeDependencies (callback) {
       let stripeJsUrl = 'https://js.stripe.com/v3/'
@@ -132,14 +134,16 @@ export default {
     unbindEventListeners () {
       this.stripe.card.removeEventListener('change', this.onStripeCardChange)
     },
-    processStripeForm () {
-      let self = this
+    processStripeForm (payment, $v) {
+      // We are not calling placeOrderWithPayload so commented unused code
+      // let self = this
 
       // Start display loader
       EventBus.$emit('notification-progress-start', [i18n.t('Placing Order'), '...'].join(''))
 
       // Create payment method with Stripe
       this.stripe.instance.createPaymentMethod('card', this.stripe.card).then((result) => {
+
         if (result.error) {
           // Inform the user if there was an error.
           let errorElement = document.getElementById('vsf-stripe-card-errors')
@@ -149,9 +153,18 @@ export default {
           // Stop display loader
           EventBus.$emit('notification-progress-stop')
         } else {
-          self.placeOrderWithPayload(this.formatTokenPayload(result.paymentMethod))
+          // TODO Check if brand and last4 is needed an pass it to show to customer
+          payment.paymentMethodAdditional = {
+            id: result.paymentMethod.id
+          }
+          this.$bus.$emit('checkout-after-paymentDetails', payment, $v);
+          // This is done in confirm order page instead
+          // self.placeOrderWithPayload(this.formatTokenPayload(result.paymentMethod))
         }
       })
+    },
+    checkoutAfterPaymentDetails (payment, $v) {
+      this.$bus.$emit('checkout-after-paymentDetails', payment, $v)
     },
     placeOrderWithPayload (payload) {
       EventBus.$emit('checkout-do-placeOrder', payload)
@@ -174,6 +187,7 @@ export default {
 <style lang="scss" scoped>
 
   .vsf-stripe-container {
+    flex: 1;
     label {
       font-weight: 500;
       font-size: 14px;

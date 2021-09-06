@@ -1,0 +1,74 @@
+diff --git src/themes/components/organisms/o-confirm-order.vue src/themes/components/organisms/o-confirm-order.vue
+index 9f1fc87..7ccf380 100644
+--- src/themes/components/organisms/o-confirm-order.vue
++++ src/themes/components/organisms/o-confirm-order.vue
+@@ -295,7 +295,7 @@
+       <SfButton
+         class="sf-button--full-width actions__button"
+         :disabled="$v.orderReview.$invalid || !productsInCart.length"
+-        @click="placeOrder"
++        @click="payAndplaceOrder"
+       >
+         {{ $t("Place the order") }}
+       </SfButton>
+@@ -331,6 +331,7 @@ import MPriceSummary from 'theme/components/molecules/m-price-summary';
+ import APromoCode from 'theme/components/atoms/a-promo-code';
+ import { ModalList } from 'theme/store/ui/modals'
+ import { createSmoothscroll } from 'theme/helpers';
++import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+ 
+ export default {
+   name: 'OConfirmOrder',
+@@ -493,6 +494,9 @@ export default {
+     },
+     openTermsAndConditionsModal () {
+       this.openModal({ name: ModalList.TermsAndConditions })
++    },
++    payAndplaceOrder() {
++      EventBus.$emit('checkout-do-placeOrder', this.paymentDetails.paymentMethodAdditional)
+     }
+   },
+   mounted () {
+diff --git src/themes/components/organisms/o-payment.vue src/themes/components/organisms/o-payment.vue
+index f08b88c..07186f5 100644
+--- src/themes/components/organisms/o-payment.vue
++++ src/themes/components/organisms/o-payment.vue
+@@ -213,7 +213,8 @@
+       class="sf-heading--left sf-heading--no-underline title"
+     />
+     <div class="form">
+-      <div class="form__radio-group">
++      <!-- Commented as Stripe will be default if exist -->
++      <!-- <div class="form__radio-group" v-if="paymentMethods.length > 1">
+         <SfRadio
+           v-for="method in paymentMethods"
+           :key="method.code"
+@@ -224,7 +225,9 @@
+           class="form__radio payment-method"
+           @input="changePaymentMethod"
+         />
+-      </div>
++      </div> -->
++      <!-- The stripe method integration -->
++      <payment-stripe />
+       <div class="form__action">
+         <SfButton
+           class="sf-button--full-width form__action-button"
+@@ -265,6 +268,7 @@ import {
+ import { createSmoothscroll } from 'theme/helpers';
+ import { mapGetters } from 'vuex';
+ const States = require('src/themes/notnaked/resource/i18n/resource/states.json')
++import PaymentStripe from 'src/modules/payment-stripe/components/PaymentStripe'
+ 
+ export default {
+   name: 'OPayment',
+@@ -281,7 +285,8 @@ export default {
+     SfHeading,
+     SfCheckbox,
+     MAddressPicker,
+-    APromoCode
++    APromoCode,
++    PaymentStripe
+   },
+   mixins: [Payment],
+   validations () {
