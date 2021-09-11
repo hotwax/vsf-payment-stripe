@@ -1,5 +1,5 @@
 diff --git src/themes/components/organisms/o-confirm-order.vue src/themes/components/organisms/o-confirm-order.vue
-index 9f1fc87..7ccf380 100644
+index 9f1fc87..0043ebc 100644
 --- src/themes/components/organisms/o-confirm-order.vue
 +++ src/themes/components/organisms/o-confirm-order.vue
 @@ -295,7 +295,7 @@
@@ -11,21 +11,44 @@ index 9f1fc87..7ccf380 100644
        >
          {{ $t("Place the order") }}
        </SfButton>
-@@ -331,6 +331,7 @@ import MPriceSummary from 'theme/components/molecules/m-price-summary';
+@@ -331,6 +331,9 @@ import MPriceSummary from 'theme/components/molecules/m-price-summary';
  import APromoCode from 'theme/components/atoms/a-promo-code';
  import { ModalList } from 'theme/store/ui/modals'
  import { createSmoothscroll } from 'theme/helpers';
 +import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
++import { authorizePayment } from 'src/modules/payment-stripe/helpers'
++import config from 'config'
  
  export default {
    name: 'OConfirmOrder',
-@@ -493,6 +494,9 @@ export default {
+@@ -493,6 +496,30 @@ export default {
      },
      openTermsAndConditionsModal () {
        this.openModal({ name: ModalList.TermsAndConditions })
 +    },
-+    payAndplaceOrder() {
-+      EventBus.$emit('checkout-do-placeOrder', this.paymentDetails.paymentMethodAdditional)
++    async payAndplaceOrder() {
++      const response = await authorizePayment(this.paymentDetails, this.personalDetails);
++      // TODO Handle error
++      if (response.code == 200) {
++        if (response.result.requires_action) {
++            const stripeInstance = window.Stripe(config.stripe.apiKey);
++            try {
++              const cardActionResponse = await stripeInstance.confirmCardPayment(response.result.payment_intent_client_secret)
++              //const cardActionResponse = await stripeInstance.handleCardAction(response.result.payment_intent_client_secret);
++              // TODO Handle this
++              this.paymentDetails.paymentMethodAdditional = cardActionResponse;
++            } catch (error) {
++              console.log("error", error);
++            }
++            // Initially order will be placed for both the cases
++            // TODO
++            EventBus.$emit('checkout-do-placeOrder', this.paymentDetails.paymentMethodAdditional)
++        } else {
++          EventBus.$emit('checkout-do-placeOrder', this.paymentDetails.paymentMethodAdditional)
++        }
++      }
++
++
      }
    },
    mounted () {

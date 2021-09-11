@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import i18n from '@vue-storefront/i18n'
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
@@ -42,9 +42,14 @@ export default {
       }
     }
   },
-  computed: mapState({
-    stripeConfig: state => state.config.stripe
-  }),
+  computed: {
+    ...mapGetters({
+      paymentDetails: 'checkout/getPaymentDetails',
+    }),
+    ...mapState({
+      stripeConfig: state => state.config.stripe
+    })
+  },
   beforeMount () {
     EventBus.$on('order-after-placed', this.onAfterPlaceOrder)
     // Added Stripe specific event needed for Not Naked/Capybara theme where there is a separate confirmation page after payment 
@@ -141,9 +146,15 @@ export default {
       // Start display loader
       EventBus.$emit('notification-progress-start', [i18n.t('Placing Order'), '...'].join(''))
 
-      // Create payment method with Stripe
-      this.stripe.instance.createPaymentMethod('card', this.stripe.card).then((result) => {
+      var data = {
+        billing_details: {}
+      };
 
+      // TODO Check empty case
+      data["billing_details"]["name"] = this.paymentDetails.firstName + " " + this.paymentDetails.lastName;
+
+      // Create payment method with Stripe
+      this.stripe.instance.createPaymentMethod('card', this.stripe.card, data).then((result) => {
         if (result.error) {
           // Inform the user if there was an error.
           let errorElement = document.getElementById('vsf-stripe-card-errors')
