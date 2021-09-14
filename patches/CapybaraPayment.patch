@@ -1,7 +1,7 @@
-diff --git src/themes/components/organisms/o-confirm-order.vue src/themes/components/organisms/o-confirm-order.vue
+diff --git src/themes/notnaked/components/organisms/o-confirm-order.vue src/themes/notnaked/components/organisms/o-confirm-order.vue
 index 9f1fc87..0043ebc 100644
---- src/themes/components/organisms/o-confirm-order.vue
-+++ src/themes/components/organisms/o-confirm-order.vue
+--- src/themes/notnaked/components/organisms/o-confirm-order.vue
++++ src/themes/notnaked/components/organisms/o-confirm-order.vue
 @@ -295,7 +295,7 @@
        <SfButton
          class="sf-button--full-width actions__button"
@@ -52,10 +52,10 @@ index 9f1fc87..0043ebc 100644
      }
    },
    mounted () {
-diff --git src/themes/components/organisms/o-payment.vue src/themes/components/organisms/o-payment.vue
+diff --git src/themes/notnaked/components/organisms/o-payment.vue src/themes/notnaked/components/organisms/o-payment.vue
 index f08b88c..07186f5 100644
---- src/themes/components/organisms/o-payment.vue
-+++ src/themes/components/organisms/o-payment.vue
+--- src/themes/notnaked/components/organisms/o-payment.vue
++++ src/themes/notnaked/components/organisms/o-payment.vue
 @@ -213,7 +213,8 @@
        class="sf-heading--left sf-heading--no-underline title"
      />
