@@ -144,7 +144,7 @@ export default {
       // let self = this
 
       // Start display loader
-      EventBus.$emit('notification-progress-start', [i18n.t('Placing Order'), '...'].join(''))
+      EventBus.$emit('notification-progress-start', [i18n.t('Processing Payment'), '...'].join(''))
 
       var data = {
         billing_details: {}
@@ -171,6 +171,7 @@ export default {
           this.$bus.$emit('checkout-after-paymentDetails', payment, $v);
           // This is done in confirm order page instead
           // self.placeOrderWithPayload(this.formatTokenPayload(result.paymentMethod))
+          EventBus.$emit('notification-progress-stop')
         }
       })
     },
