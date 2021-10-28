@@ -150,8 +150,11 @@ export default {
         billing_details: {}
       };
 
-      // TODO Check empty case
-      data["billing_details"]["name"] = this.paymentDetails.firstName + " " + this.paymentDetails.lastName;
+      let firstName = payment.firstName;
+      let lastName = payment.lastName;
+
+      const name = firstName ? firstName : ""  + " " + lastName ? lastName : "";
+      if(name) data["billing_details"]["name"] = name;
 
       // Create payment method with Stripe
       this.stripe.instance.createPaymentMethod('card', this.stripe.card, data).then((result) => {
